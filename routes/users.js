@@ -8,22 +8,29 @@ const authCheck = require('../utils/auth_check');
 // ==========================
 // LOCAL AUTH ===============
 // ==========================
-
-router.post('/login', (req, res, next) => {
-  return passport.authenticate('local-login', (err, token, user) => {
-    //console.log(err);
-    if (err) { return res.status(401).json({success: false, error: err.message}); }
-    return res.json({ success: true, token, user });
-  })(req, res, next);
-});
-
 router.post('/signup', function(req, res, next){
-  passport.authenticate('local-signup', function(err, user, info) {
+  passport.authenticate('local-strategy', function(err, user, info) {
     if (err) { return next(err) }
     if (!user) { return res.json({'errMessage': info.message})}
     return res.json(user);
   })(req, res, next);
 });
+
+router.post('/login', (req, res, next) => {
+  return passport.authenticate('local-strategy', (err, token, user) => {
+    if (err) { return res.status(401).json({success: false, error: err.message}); }
+    return res.json({ success: true, token, user });
+  })(req, res, next);
+});
+
+router.post('/connect', (req, res, next) => {
+  return passport.authenticate('local-strategy', (err, user) => {
+    if (err) { return next(err); }
+    if (!user) return res.json({error: 'No users'});
+    return res.json(user);
+  })(req, res, next);
+})
+
 
 router.get('/getinfo', authCheck, (req, res, next) => {
   if (req.locals && req.locals.error) { return res.status(401).json({success: false, error: req.locals.error.message});}
@@ -53,30 +60,17 @@ router.get('/social/signup', (req, res, next) => {
   return passport.authenticate(req.headers.strategy, (err, token, user) => {
     //handle error
     if (err) { return res.status(401).json({success: false, error: err.message}); }
-    return res.status(200).json({success: true, token, user});
+    return res.status(200).json({success: 'hello', token, user});
   })(req, res, next);
 
 });
-// router.get('/auth/facebook', function(req, res, next){
-//   passport.authenticate('facebook', {
-//     scope: 'email',
-//     callbackURL: '/api/users/auth/facebook/callback'
-//   })(req, res, next)
-// });
-//
-// router.get('/auth/facebook/callback',
-//   passport.authenticate('facebook', {failureRedirect:'/login'}),
-//   function(req, res){
-//     //console.log(req.session);
-//     return res.json(req.user);
-//     //res.redirect('http://192.168.0.64:3038/login?continue=ok');
-//   }
-// );
 
-// router.get('/auth/facebook/callback', passport.authenticate('facebook', {
-//   successRedirect: '/api/movies',
-//   failureRedirect: '/'
-// }));
+router.get('/social/connect', (req, res, next) => {
+  return passport.authenticate(req.headers.strategy, (err, user) => {
+    if (err) return res.status(401).json({success: false, eroor: err.message});
+    return res.status(200).json({ success: true, user });
+  })(req, res, next);
+})
 
 // ==========================
 // AUTHORIZE ================
