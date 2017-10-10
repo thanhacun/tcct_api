@@ -25,7 +25,7 @@ module.exports = (req, res, next) => {
       //set error in req.locals
       //may be for development only
       if (error.message) {
-        req.locals.error = error;
+        res.locals.error = error;
       }
       req.user = user;
       return next();

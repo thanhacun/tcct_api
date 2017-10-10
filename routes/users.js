@@ -40,12 +40,6 @@ router.get('/getinfo', authCheck, (req, res, next) => {
 // =========================
 // FACEBOOK ================
 // =========================
-// router.get('/auth/social', function(req, res, next){
-//   next();
-// }, passport.authenticate('facebook-token'), function(req, res){
-//   console.log(" === FACEBOOOK TOKEN === ");
-//   res.json(req.user);
-// });
 
 router.get('/social/login', (req, res, next) => {
   return passport.authenticate(req.headers.strategy, (err, token, user) => {
@@ -67,10 +61,17 @@ router.get('/social/signup', (req, res, next) => {
 
 router.get('/social/connect', (req, res, next) => {
   return passport.authenticate(req.headers.strategy, (err, user) => {
-    if (err) return res.status(401).json({success: false, eroor: err.message});
+    if (err) return res.status(401).json({success: false, error: err.message});
     return res.status(200).json({ success: true, user });
   })(req, res, next);
-})
+});
+
+router.get('/social/unlink', (req, res, next) => {
+  return passport.authenticate(req.headers.strategy, (err, user) => {
+    if (err) return res.status(401).json({success: false, error: err.message});
+    return res.status(200).json({ success: true, user});
+  })(req, res, next);
+});
 
 // ==========================
 // AUTHORIZE ================

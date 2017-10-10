@@ -44,11 +44,16 @@ module.exports = function(passport) {
           const { social_email, social_provider } = req.query;
           User.findOne({[`${social_provider}.email`]: social_email}, (err, socialUser) => {
             if (err || !socialUser)  return done(err);
-            user[social_provider] = socialUser[social_provider];
-            user.save((err) => {
+            socialUser.local = user.local;
+
+            // save socialUser then remove user
+            socialUser.save((err) => {
               if (err) throw err;
-              return done(null, user);
-            }) ;
+              user.remove((err) => {
+                if (err) throw err;
+                return done(null, socialUser);
+              });
+            });
           });
         }
 
@@ -70,6 +75,10 @@ module.exports = function(passport) {
 // ==========================
 // FACEBOOK TOKEN ===========
 // ==========================
+
+// TODO: a function to return straegy for facebook, google and twitter
+// (provider, clientID, clientSecret) => provider strategy
+
 passport.use(new FacebookTokenStrategy({
   clientID: configAuth.facebookAuth.clientID,
   clientSecret: configAuth.facebookAuth.clientSecret,
@@ -81,9 +90,20 @@ passport.use(new FacebookTokenStrategy({
   User.findOne({[`${provider}.id`]: profile.id}, function(err, user) {
     if (err) return done(err);
     if (user) { // social user existed in database
-      if (req.path === '/social/signup') return done(new Error('User existed!'));
+      if (req.path === '/social/signup') {
+        if (user[provider].token) { //user existed -> reject
+          return done(new Error('User already exist!'));
+        } else { //user unlinked, will re-link the user
+          user[provider].token = accessToken;
+          user.save((err) => {
+            if (err) throw err;
+            return done(null, user);
+          })
+        }
+      };
 
       if (req.path === '/social/login') {
+        if (!user[provider].token) return done(new Error('User already unlinked!'));
         // create jwt token and log the social user in
         const payload = {sub: user };
         const token = jwt.sign(payload, configAuth.jwtSecret);
@@ -91,25 +111,52 @@ passport.use(new FacebookTokenStrategy({
       }
 
       if (req.path === '/social/connect') {
-        // save local user to social user
         // need local user data (or _id, or email)
-        const { local_email } = req.query;
+        if (!user[provider].token) return done(new Error('User already unlinked!'));
+        const { local_email } = req.headers;
         User.findOne({'local.email': local_email}, (err, localUser) => {
           if (err || !localUser) return done(err);
-          user.local = localUser.local;
+          localUser[provider] = user[provider];
+
+          //save locaUser then remove user
+          localUser.save((err) => {
+            if (err) throw err;
+            user.remove((err) => {
+              if (err) throw err;
+              return done(null, localUser);
+            });
+          });
+        });
+      }
+
+      if (req.path === '/social/unlink') {
+        // if having local, move social user to a new one
+        if (user.local && user.local.email) {
+          let newUser = new User();
+          newUser[provider] = user[provider];
+          user[provider] = {};
           user.save((err) => {
             if (err) throw err;
-            return done(null, user);
+            newUser.save((err) => {
+              if (err) throw err;
+              return done(null, user);
+            })
           })
-        })
+        } else { // else delete social user token
+            user[provider].token = '';
+            user.save((err) => {
+              if (err) throw err;
+              return done(null, user);
+            });
+        }
       }
     } else { // social user does not exist in database
       if (req.path === '/social/signup') { // create new social user in database
-        var newUser = new User();
-        newUser.facebook.id = profile.id;
-        newUser.facebook.token = accessToken;
-        newUser.facebook.name = profile.name.givenName + ' ' + profile.name.familyName;
-        newUser.facebook.email = profile.emails[0].value;
+        let newUser = new User();
+        newUser[provider].id = profile.id;
+        newUser[provider].token = accessToken;
+        newUser[provider].name = profile.name.givenName + ' ' + profile.name.familyName;
+        newUser[provider].email = profile.emails[0].value;
 
         newUser.save(function(err) {
           if (err) throw err;
