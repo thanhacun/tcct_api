@@ -44,7 +44,7 @@ module.exports = function(passport) {
           const { social_email, social_provider } = req.query;
           User.findOne({[`${social_provider}.email`]: social_email}, (err, socialUser) => {
             if (err || !socialUser)  return done(err);
-            socialUser.local = user.local;
+            socialUser.local = user.local
 
             // save socialUser then remove user
             socialUser.save((err) => {

@@ -63,6 +63,8 @@ app.use('/api/users', users);
 app.use('/api/movies', movies);
 
 // catch 404 and forward to error handler
+// NOTE: this is how 404 error is handled by using last middleware
+// just before the errors handle middleware
 app.use(function(req, res, next) {
   var err = new Error('Not Found');
   err.status = 404;
