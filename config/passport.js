@@ -67,7 +67,7 @@ module.exports = function(passport) {
             return done(null, newUser);
           });
         }
-        if (req.path === '/local' || req.path === '/connect') return done(new Error('Email does not exist!'))
+        if (req.path === '/login' || req.path === '/connect') return done(new Error('Email does not exist!'))
       }
     })
   }));
