@@ -1,8 +1,14 @@
 const jwt = require('jsonwebtoken');
 var LocalStrategy = require('passport-local').Strategy;
-var FacebookTokenStrategy = require('passport-facebook-token');
+//TODO: better way to return a function dynamically
+const SocialStrategies = {
+  'facebook': require('passport-facebook-token'),
+  'google': require('passport-google-token').Strategy
+}
+
 var User = require('../models/user');
 var configAuth = require('./auth');
+
 
 module.exports = function(passport) {
   passport.serializeUser(function(user, done){
@@ -73,99 +79,109 @@ module.exports = function(passport) {
   }));
 
 // ==========================
-// FACEBOOK TOKEN ===========
+// SOCIAL TOKEN STRATEGIES===
 // ==========================
 
-// TODO: a function to return straegy for facebook, google and twitter
+// helper functions return straegy for facebook, google and twitter
 // (provider, clientID, clientSecret) => provider strategy
 
-passport.use(new FacebookTokenStrategy({
-  clientID: configAuth.facebookAuth.clientID,
-  clientSecret: configAuth.facebookAuth.clientSecret,
-  passReqToCallback: true
-}, function(req, accessToken, refreshToken, profile, done) {
-  console.log("=== FACEBOOK TOKEN STRATEGY ===");
-  const provider = profile.provider;
+  const socialTokenStrategy = (provider, middleware=socialTokenMiddleware) => {
+    console.log(`=== ${provider} token strategy ===`);
+    //convert specific provider into Strategy, ID, secret
+    const SocialTokenStrategy = SocialStrategies[provider];
+    const { clientID, clientSecret } = configAuth[provider];
+    passport.use(new SocialTokenStrategy({
+      clientID,
+      clientSecret,
+      passReqToCallback: true
+    }, socialTokenMiddleware))
+  };
 
-  User.findOne({[`${provider}.id`]: profile.id}, function(err, user) {
-    if (err) return done(err);
-    if (user) { // social user existed in database
-      if (req.path === '/social/signup') {
-        if (user[provider].token) { //user existed -> reject
-          return done(new Error('User already exist!'));
-        } else { //user unlinked, will re-link the user
-          user[provider].token = accessToken;
-          user.save((err) => {
-            if (err) throw err;
-            return done(null, user);
-          })
-        }
-      };
-
-      if (req.path === '/social/login') {
-        if (!user[provider].token) return done(new Error('User already unlinked!'));
-        // create jwt token and log the social user in
-        const payload = {sub: user };
-        const token = jwt.sign(payload, configAuth.jwtSecret);
-        return done(null, token, user);
-      }
-
-      if (req.path === '/social/connect') {
-        // need local user data (or _id, or email)
-        if (!user[provider].token) return done(new Error('User already unlinked!'));
-        const { local_email } = req.headers;
-        User.findOne({'local.email': local_email}, (err, localUser) => {
-          if (err || !localUser) return done(err);
-          localUser[provider] = user[provider];
-
-          //save locaUser then remove user
-          localUser.save((err) => {
-            if (err) throw err;
-            user.remove((err) => {
-              if (err) throw err;
-              return done(null, localUser);
-            });
-          });
-        });
-      }
-
-      if (req.path === '/social/unlink') {
-        // if having local, move social user to a new one
-        if (user.local && user.local.email) {
-          let newUser = new User();
-          newUser[provider] = user[provider];
-          user[provider] = {};
-          user.save((err) => {
-            if (err) throw err;
-            newUser.save((err) => {
+  const socialTokenMiddleware = (req, accessToken, refreshToken, profile, done) => {
+    /* Middleware to handle social login logic */
+    const { provider } = profile;
+    User.findOne({[`${provider}.id`]: profile.id}, function(err, user) {
+      if (err) return done(err);
+      if (user) { // social user existed in database
+        if (req.path === '/social/signup') {
+          if (user[provider].token) { //user existed -> reject
+            return done(new Error('User already exist!'));
+          } else { //user unlinked, will re-link the user
+            user[provider].token = accessToken;
+            user.save((err) => {
               if (err) throw err;
               return done(null, user);
             })
-          })
-        } else { // else delete social user token
+          }
+        };
+
+        if (req.path === '/social/login') {
+          if (!user[provider].token) return done(new Error('User already unlinked!'));
+          // create jwt token and log the social user in
+          const payload = {sub: user };
+          const token = jwt.sign(payload, configAuth.jwtSecret);
+          return done(null, token, user);
+        }
+
+        if (req.path === '/social/connect') {
+          // need local user data (or _id, or email)
+          if (!user[provider].token) return done(new Error('User already unlinked!'));
+          const { local_email } = req.headers;
+          User.findOne({'local.email': local_email}, (err, localUser) => {
+            if (err || !localUser) return done(err);
+            localUser[provider] = user[provider];
+
+            //save locaUser then remove user
+            localUser.save((err) => {
+              if (err) throw err;
+              user.remove((err) => {
+                if (err) throw err;
+                return done(null, localUser);
+              });
+            });
+          });
+        }
+
+        if (req.path === '/social/unlink') {
+          // if having local, move social user to a new one
+          if (user.local && user.local.email) {
+            let newUser = new User();
+            newUser[provider] = user[provider];
+            user[provider] = {};
+            user.save((err) => {
+              if (err) throw err;
+              newUser.save((err) => {
+                if (err) throw err;
+                return done(null, user);
+              })
+            })
+          } else { // else delete social user token
             user[provider].token = '';
             user.save((err) => {
               if (err) throw err;
               return done(null, user);
             });
+          }
         }
-      }
-    } else { // social user does not exist in database
-      if (req.path === '/social/signup') { // create new social user in database
-        let newUser = new User();
-        newUser[provider].id = profile.id;
-        newUser[provider].token = accessToken;
-        newUser[provider].name = profile.name.givenName + ' ' + profile.name.familyName;
-        newUser[provider].email = profile.emails[0].value;
+      } else { // social user does not exist in database
+        if (req.path === '/social/signup') { // create new social user in database
+          let newUser = new User();
+          newUser[provider].id = profile.id;
+          newUser[provider].token = accessToken;
+          newUser[provider].name = profile.name.givenName + ' ' + profile.name.familyName;
+          newUser[provider].email = profile.emails[0].value;
 
-        newUser.save(function(err) {
-          if (err) throw err;
-          return done(null, newUser);
-        });
+          newUser.save(function(err) {
+            if (err) throw err;
+            return done(null, newUser);
+          });
+        }
+        if (req.path === '/social/login' || req.path === '/social/connect') return done(new Error('User does not exist!'));
       }
-      if (req.path === '/social/login' || req.path === '/social/connect') return done(new Error('User does not exist!'));
-    }
-  });
-}
-));
+    });
+  }
+
+  socialTokenStrategy('facebook');
+  socialTokenStrategy('google');
+
 };
