@@ -1,4 +1,5 @@
 node_modules
+# only auth.js
 config/auth.js
 local_data
 data
