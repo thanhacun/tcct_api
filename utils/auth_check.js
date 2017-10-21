@@ -21,13 +21,13 @@ module.exports = (req, res, next) => {
 
     const decodedUser = decoded.sub;
     User.findById(decodedUser, (err, user) => {
-      if (err || !user) {error.message = 'Wrong user or password!';}
+      if (err || !user) {error.message = 'Wrong password or no user!';}
       //set error in req.locals
       //may be for development only
       if (error.message) {
         res.locals.error = error;
       }
-      req.user = user;
+      req.user = {user};
       return next();
     });
   });

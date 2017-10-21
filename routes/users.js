@@ -6,7 +6,7 @@ var router = express.Router();
 const authCheck = require('../utils/auth_check');
 
 router.get('/getinfo', authCheck, (req, res, next) => {
-  if (req.locals && req.locals.error) { return res.status(401).json({success: false, error: req.locals.error.message});}
+  if (req.locals && req.locals.error) { return res.status(401).json({error: req.locals.error.message});}
   return res.status(200).json(req.user);
 });
 
@@ -16,14 +16,14 @@ router.get('/getinfo', authCheck, (req, res, next) => {
 router.post(['/signup', '/connect'], function(req, res, next){
   passport.authenticate('local-strategy', function(err, user) {
     if (err) { return res.status(401).json({error: err.message}) }
-    return res.status(200).json({success:true, user});
+    return res.status(200).json({user});
   })(req, res, next);
 });
 
 router.post('/login', (req, res, next) => {
   return passport.authenticate('local-strategy', (err, token, user) => {
-    if (err) { return res.status(401).json({success: false, error: err.message}); }
-    return res.json({ success: true, token, user });
+    if (err) { return res.status(401).json({error: err.message}); }
+    return res.json({token, user});
   })(req, res, next);
 });
 
@@ -33,16 +33,16 @@ router.post('/login', (req, res, next) => {
 router.get(['/social/signup', '/social/connect', '/social/unlink'], (req, res, next) => {
   return passport.authenticate(req.headers.strategy, (err, user) => {
     //handle error
-    if (err) { return res.status(401).json({success: false, error: err.message}); }
-    return res.status(200).json({success: true, user});
+    if (err) { return res.status(401).json({error: err.message}); }
+    return res.status(200).json({user});
   })(req, res, next);
 });
 
 router.get('/social/login', (req, res, next) => {
   return passport.authenticate(req.headers.strategy, (err, token, user) => {
     //handle error
-    if (err) { return res.status(401).json({success: false, error: err.message}); }
-    return res.status(200).json({success: true, token, user});
+    if (err) { return res.status(401).json({error: err.message}); }
+    return res.status(200).json({token, user});
   })(req, res, next);
 });
 
