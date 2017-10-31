@@ -6,7 +6,7 @@ var router = express.Router();
 const authCheck = require('../utils/auth_check');
 
 router.get('/getinfo', authCheck, (req, res, next) => {
-  if (req.locals && req.locals.error) { return res.status(401).json({error: req.locals.error.message});}
+  if (res.locals && res.locals.error) { return res.status(401).json({error: req.locals.error.message});}
   return res.status(200).json(req.user);
 });
 
