@@ -12,22 +12,33 @@ router.get('/tho', (req, res) => {
 });
 
 router.post('/tho', (req, res) => {
+  // NOTE: save method either save or update based on the existence of of _id
   if (res.locals && res.locals.error) {
     return res.status(401).json({error: res.locals.error.message});
   }
-  Tho.findOne({'index':req.body.index}, (error, tho) => {
-    if (error || tho) {
-      return res.json({error: 'Da nhap lieu hoac co loi!'});
+  const { modifiedTho, modifyAction } = req.body;
+  Tho.findOne({'index':modifiedTho.index}, (error, tho) => {
+    if (error) return res.json({error: 'Co loi, de nghi lien he tac gia!'});
+    if (modifyAction === 'save') {
+      let changedTho = (tho) ? tho : new Tho();
+
+      changedTho.index = modifiedTho.index;
+      changedTho.title = modifiedTho.title;
+      changedTho.content = modifiedTho.content;
+      changedTho.footer = modifiedTho.footer;
+
+      changedTho.save((error) => {
+        if (error) return res.json({error: error.message});
+        const update = (changedTho._id) ? 'updated' : 'added'
+        return res.status(200).json({modifiedTho: changedTho, update});
+      });
+
+    } else {
+      tho.remove((error) => {
+        if (error) return json({error: error.message});
+        return res.status(200).json({modifiedTho: tho, update: 'deleted'});
+      })
     }
-    const newTho = new Tho();
-    newTho.index = req.body.index;
-    newTho.title = req.body.title;
-    newTho.content = req.body.content;
-    newTho.footer = req.body.footer;
-    newTho.save((error) => {
-      if (error) return res.json({error: error.message});
-      return res.status(200).json(newTho);
-    })
   })
 });
 
