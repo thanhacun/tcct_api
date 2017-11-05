@@ -42,4 +42,12 @@ router.post('/tho', (req, res) => {
   })
 });
 
+router.get('/tho/emergency', (req, res) => {
+  // use to delete all data just in case, turnoff when no use!
+  Tho.remove({}, (error) => {
+    if(error) return res.json({error: 'Unknown error!'});
+    res.status(200).json({done: 'OK'});
+  })
+})
+
 module.exports = router;
