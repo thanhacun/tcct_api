@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const Tho = mongoose.Schema({
-  index: Number,
+  index: {type: Number, unique: true},
   title: String,
   content: String,
   footer: String

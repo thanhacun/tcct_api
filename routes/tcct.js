@@ -29,7 +29,7 @@ router.post('/tho', (req, res) => {
 
       changedTho.save((error) => {
         if (error) return res.json({error: error.message});
-        const update = (changedTho._id) ? 'updated' : 'added'
+        const update = (tho) ? 'updated' : 'added'
         return res.status(200).json({modifiedTho: changedTho, update});
       });
 
@@ -42,12 +42,12 @@ router.post('/tho', (req, res) => {
   })
 });
 
-router.get('/tho/emergency', (req, res) => {
-  // use to delete all data just in case, turnoff when no use!
-  Tho.remove({}, (error) => {
-    if(error) return res.json({error: 'Unknown error!'});
-    res.status(200).json({done: 'OK'});
-  })
-})
+// router.get('/tho/emergency', (req, res) => {
+//   // use to delete all data just in case, turnoff when no use!
+//   Tho.remove({}, (error) => {
+//     if(error) return res.json({error: 'Unknown error!'});
+//     res.status(200).json({done: 'OK'});
+//   })
+// });
 
 module.exports = router;
