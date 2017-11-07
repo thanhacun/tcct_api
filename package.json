@@ -16,6 +16,7 @@
     "jade": "~1.11.0",
     "jsonwebtoken": "^8.0.1",
     "mongoose": "^4.11.12",
+    "mongoose-algolia": "^1.7.1",
     "morgan": "~1.8.1",
     "passport": "^0.4.0",
     "passport-facebook": "^2.1.1",
