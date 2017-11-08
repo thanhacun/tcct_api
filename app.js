@@ -22,7 +22,7 @@ var app = express();
 // ==========================
 mongoose.connect(process.env.MONGO_URI, {
   // options
-  useMongoClient: true
+  //useMongoClient: true
 });
 mongoose.Promise = global.Promise;
 mongoose.connection.on('error', (err) => {
