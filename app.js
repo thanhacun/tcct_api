@@ -8,6 +8,8 @@ var mongoose = require('mongoose');
 var passport = require('passport');
 var session = require('express-session');
 
+require('dotenv').config()
+
 var index = require('./routes/index');
 var users = require('./routes/users');
 const tcct = require('./routes/tcct');
@@ -18,8 +20,7 @@ var app = express();
 // ==========================
 // MONGODB =================
 // ==========================
-var configDB = require('./config/database');
-mongoose.connect(configDB.url, {
+mongoose.connect(process.env.MONGO_URI, {
   // options
   useMongoClient: true
 });
@@ -42,7 +43,13 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+
 app.use(express.static(path.join(__dirname, 'public')));
+// production mode and for SPA (client-render)
+// app.use(express.static(path.join(__dirname, 'build')));
+// app.get('/*', function(req, res){
+//   res.sendFile(path.join(__dirname, 'build', 'index.html'));
+// });
 
 //enable CORS in express
 // app.use(function(req, res, next) {

@@ -7,7 +7,16 @@ const SocialStrategies = {
 }
 
 var User = require('../models/user');
-var configAuth = require('./auth');
+const configAuth = {
+  facebook: {
+    clientID: process.env.FACEBOOK_CLIENT_ID,
+    clientSecret: process.env.FACEBOOK_CLIENT_SECRET
+  },
+  google: {
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET
+  }
+}
 
 
 module.exports = function(passport) {
@@ -38,7 +47,7 @@ module.exports = function(passport) {
         if (req.path === '/login') {// generate token and log user in
           if (!user.validPassword(password)) return done(new Error('Wrong password!'));
           const payload = {sub: user};
-          const token = jwt.sign(payload, configAuth.jwtSecret);
+          const token = jwt.sign(payload, process.env.JWT_SECRET);
           return done(null, token, user);
         }
 
@@ -119,7 +128,7 @@ module.exports = function(passport) {
           if (!user[provider].token) return done(new Error('User already unlinked!'));
           // create jwt token and log the social user in
           const payload = {sub: user };
-          const token = jwt.sign(payload, configAuth.jwtSecret);
+          const token = jwt.sign(payload, process.env.JWT_SECRET);
           return done(null, token, user);
         }
 
