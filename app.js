@@ -20,9 +20,9 @@ var app = express();
 // ==========================
 // MONGODB =================
 // ==========================
-mongoose.connect(process.env.MONGO_URI, {
+mongoose.connect(process.env.MONGODB_URI, {
   // options
-  //useMongoClient: true
+  useMongoClient: true
 });
 mongoose.Promise = global.Promise;
 mongoose.connection.on('error', (err) => {
