@@ -3,6 +3,5 @@ node_modules
 config/auth.js
 local_data
 data
-build
 dump
 .env
