@@ -45,11 +45,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 app.use(express.static(path.join(__dirname, 'public')));
-// production mode and for SPA (client-render)
-app.use(express.static(path.join(__dirname, 'build')));
-app.get('/', function(req, res){
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
-});
 
 //enable CORS in express
 // app.use(function(req, res, next) {
@@ -65,9 +60,15 @@ app.use(session({ secret: 'my api server' }));
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use('/', index);
+//app.use('/', index);
 app.use('/api/users', users);
 app.use('/api/tcct', tcct);
+
+// production mode and for SPA (client-render)
+app.use(express.static(path.join(__dirname, 'build')));
+app.get('/*', function(req, res){
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
 
 // catch 404 and forward to error handler
 // NOTE: this is how 404 error is handled by using last middleware
