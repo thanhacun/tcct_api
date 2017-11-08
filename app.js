@@ -10,7 +10,6 @@ var session = require('express-session');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
-var movies = require('./routes/movies');
 const tcct = require('./routes/tcct');
 
 
@@ -61,7 +60,6 @@ app.use(passport.session());
 
 app.use('/', index);
 app.use('/api/users', users);
-app.use('/api/movies', movies);
 app.use('/api/tcct', tcct);
 
 // catch 404 and forward to error handler

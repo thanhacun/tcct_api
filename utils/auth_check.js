@@ -4,9 +4,6 @@ const configAuth = require('../config/auth');
 
 /* Auth checker middleware function */
 
-//TODO: combine social authorization here
-// authorization: `${provider} ${token}`
-
 module.exports = (req, res, next) => {
   console.log("=== USER HAS TO LOGIN ===");
   let error = new Error();

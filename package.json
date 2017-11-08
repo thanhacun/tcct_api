@@ -1,5 +1,5 @@
 {
-  "name": "thcn-react-api",
+  "name": "tcct-api",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -20,6 +20,7 @@
     "morgan": "~1.8.1",
     "passport": "^0.4.0",
     "passport-facebook": "^2.1.1",
+    "passport-facebook-token": "^3.3.0",
     "passport-google-token": "^0.1.2",
     "passport-local": "^1.0.0",
     "request": "^2.82.0",
