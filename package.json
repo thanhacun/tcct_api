@@ -1,10 +1,10 @@
 {
   "name": "tcct-api",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start_dev": "nodemon --ignore 'local_data/*' --ignore 'data/*' ./bin/www",
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "dev": "nodemon --ignore 'local_data/*' --ignore 'data/*' ./bin/www"
   },
   "dependencies": {
     "bcrypt-nodejs": "0.0.3",
@@ -15,13 +15,11 @@
     "dotenv": "^4.0.0",
     "express": "~4.15.2",
     "express-session": "^1.15.5",
-    "jade": "~1.11.0",
     "jsonwebtoken": "^8.0.1",
     "mongoose": "^4.11.12",
     "mongoose-algolia": "^1.7.1",
     "morgan": "~1.8.1",
     "passport": "^0.4.0",
-    "passport-facebook": "^2.1.1",
     "passport-facebook-token": "^3.3.0",
     "passport-google-token": "^0.1.2",
     "passport-local": "^1.0.0",
