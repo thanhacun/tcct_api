@@ -6,14 +6,13 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var passport = require('passport');
-var session = require('express-session');
+//var session = require('express-session');
 
+// setting public variables - process.env.VAR_NAME
 require('dotenv').config()
 
-var index = require('./routes/index');
 var users = require('./routes/users');
 const tcct = require('./routes/tcct');
-
 
 var app = express();
 
@@ -31,20 +30,20 @@ mongoose.connection.on('error', (err) => {
 })
 
 // view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+// app.set('views', path.join(__dirname, 'views'));
+// app.set('view engine', 'jade');
 
 //make json response pettier
 app.set('json spaces', 2);
 
 // uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+// app.use(express.static(path.join(__dirname, 'public')));
+// app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-app.use(express.static(path.join(__dirname, 'public')));
 
 //enable CORS in express
 // app.use(function(req, res, next) {
@@ -56,15 +55,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 /* PASSPORT */
 // NOTE: jwt does not require session
 require('./config/passport')(passport);
-app.use(session({ secret: 'my api server' }));
+//app.use(session({ secret: 'my api server' }));
 app.use(passport.initialize());
 app.use(passport.session());
 
-//app.use('/', index);
 app.use('/api/users', users);
 app.use('/api/tcct', tcct);
 
-// production mode and for SPA (client-render)
+//production mode and for SPA (client-render)
 app.use(express.static(path.join(__dirname, 'build')));
 app.get('/*', function(req, res){
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
