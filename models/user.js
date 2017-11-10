@@ -23,6 +23,10 @@ var userSchema = mongoose.Schema({
     token: String,
     email: String,
     name: String
+  },
+  role: {
+    admin: {type: Boolean, default: false},
+    user: {type: Boolean, default: true} 
   }
 });
 
