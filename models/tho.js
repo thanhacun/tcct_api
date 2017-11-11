@@ -5,7 +5,8 @@ const Tho = mongoose.Schema({
   index: {type: Number, unique: true},
   title: String,
   content: String,
-  footer: String
+  footer: String,
+  imgUrl: String
 });
 
 // for sync index with Algolia

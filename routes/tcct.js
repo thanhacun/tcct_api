@@ -7,15 +7,16 @@ const authCheck = require('../utils/auth_check');
 router.get('/tho', (req, res) => {
   Tho.find({}, (error, thos) => {
     if (error) return res.json({error: error.message});
-    return res.status(200).json(thos);
+    setTimeout(() => res.status(200).json(thos), 2000)
+
   })
 });
 
 router.post('/tho', (req, res) => {
-  // NOTE: save method either save or update based on the existence of of _id
   if (res.locals && res.locals.error) {
     return res.status(401).json({error: res.locals.error.message});
   }
+  console.log(req.user);
   const { modifiedTho, modifyAction } = req.body;
   Tho.findOne({'index':modifiedTho.index}, (error, tho) => {
     if (error) return res.json({error: 'Co loi, de nghi lien he tac gia!'});
@@ -26,6 +27,7 @@ router.post('/tho', (req, res) => {
       changedTho.title = modifiedTho.title;
       changedTho.content = modifiedTho.content;
       changedTho.footer = modifiedTho.footer;
+      changedTho.imgUrl = modifiedTho.imgUrl;
 
       changedTho.save((error) => {
         if (error) return res.json({error: error.message});
