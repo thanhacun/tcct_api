@@ -6,4 +6,5 @@ data
 dump
 build
 .env
+.env.prod
 *.log
