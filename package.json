@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "nodemon --ignore 'local_data/*' --ignore 'data/*' ./bin/www",
-    "start_org": "node ./bin/www"
+    "start_dev": "nodemon --ignore 'local_data/*' --ignore 'data/*' ./bin/www",
+    "start": "node ./bin/www"
   },
   "dependencies": {
     "bcrypt-nodejs": "0.0.3",

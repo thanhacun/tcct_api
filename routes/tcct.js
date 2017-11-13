@@ -7,8 +7,8 @@ const authCheck = require('../utils/auth_check');
 router.get('/tho', (req, res) => {
   Tho.find({}, (error, thos) => {
     if (error) return res.json({error: error.message});
-    setTimeout(() => res.status(200).json(thos), 2000)
-
+    res.status(200).json(thos);
+    //setTimeout(() => res.status(200).json(thos), 2000)
   })
 });
 
