@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 var LocalStrategy = require('passport-local').Strategy;
-//TODO: better way to return a function dynamically
+//[ ] TODO: better way to return a function dynamically
 const SocialStrategies = {
   'facebook': require('passport-facebook-token'),
   'google': require('passport-google-token').Strategy
