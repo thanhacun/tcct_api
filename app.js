@@ -11,7 +11,7 @@ var passport = require('passport');
 // setting public variables - process.env.VAR_NAME
 require('dotenv').config()
 
-var users = require('./routes/users');
+const users = require('./routes/users');
 const tcct = require('./routes/tcct');
 
 var app = express();
@@ -37,6 +37,7 @@ mongoose.connection.on('error', (err) => {
 app.set('json spaces', 2);
 
 // uncomment after placing your favicon in /public
+app.use(express.static(path.join(__dirname, 'build')));
 // app.use(express.static(path.join(__dirname, 'public')));
 // app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
@@ -65,8 +66,7 @@ app.use('/api/users', users);
 app.use('/api/tcct', tcct);
 
 //production mode and for SPA (client-render)
-app.use(express.static(path.join(__dirname, 'build')));
-app.get('/*', function(req, res){
+app.get('*', function(req, res){
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 

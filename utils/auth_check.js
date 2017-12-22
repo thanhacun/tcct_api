@@ -6,14 +6,20 @@ const User = require('../models/user');
 module.exports = (req, res, next) => {
   console.log("=== USER HAS TO LOGIN ===");
   let error = new Error();
-  if (!req.headers.authorization) {error.message = 'Not yet logged in!';}
+  if (!req.headers.authorization) {
+    // error.message = 'Not yet logged in!';
+    return next();
+  }
 
   // get the provider and authorization string
   // NOTE: no need the provider as it is always bearer
   const [provider, token] = req.headers.authorization.split(' ');
   // decode the token using the secret key phrase
   return jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-    if (err) {error.message = 'Cannot verify user!';}
+    if (err) {
+      // error.message = 'Cannot verify user!';
+      return next();
+    }
 
     const decodedUser = decoded.sub;
     User.findById(decodedUser, (err, user) => {

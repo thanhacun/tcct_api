@@ -5,8 +5,9 @@ var router = express.Router();
 
 const authCheck = require('../utils/auth_check');
 
-router.get('/getinfo', authCheck, (req, res, next) => {
+router.get('/getinfo', authCheck, (req, res) => {
   if (res.locals && res.locals.error) { return res.status(401).json({error: req.locals.error.message});}
+  if (!req.user) { return res.status(401).json({error: 'There is no user!'})};
   return res.status(200).json(req.user);
 });
 
