@@ -26,9 +26,9 @@ module.exports = (req, res, next) => {
       if (err || !user) {error.message = 'Wrong password or no user!';}
       // set error in req.locals
       // may be for development only
-      if (error.message) {
-        res.locals.error = error;
-      }
+      // if (error.message) {
+      //   res.locals.error = error;
+      // }
       req.user = {user};
       return next();
     });
