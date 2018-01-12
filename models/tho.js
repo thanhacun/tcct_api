@@ -6,7 +6,8 @@ const ThoSchema = mongoose.Schema({
   title: String,
   content: String,
   footer: String,
-  imgUrl: String
+  imgUrl: String,
+  mediaUrl: String
 });
 
 // for sync index with Algolia
@@ -14,7 +15,7 @@ ThoSchema.plugin(mongooseAlgolia, {
   appId: '4VFRX3XOJ8',
   apiKey: 'bf1aafb5802e23d47ce8111177f9d755',
   indexName: 'dev_THO',
-  selector: 'index title content imgUrl footer'
+  selector: 'index title content imgUrl footer mediaUrl'
 });
 
 const Tho = mongoose.model('Tho', ThoSchema);

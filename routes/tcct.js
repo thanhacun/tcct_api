@@ -8,7 +8,6 @@ router.get('/tho', (req, res) => {
   Tho.find({}, (error, thos) => {
     if (error) return res.json({error: error.message});
     res.status(200).json(thos);
-    //setTimeout(() => res.status(200).json(thos), 2000)
   })
 });
 
@@ -16,7 +15,6 @@ router.post('/tho', (req, res) => {
   if (res.locals && res.locals.error) {
     return res.status(401).json({error: res.locals.error.message});
   }
-  console.log(req.user);
   const { modifiedTho, modifyAction } = req.body;
   Tho.findOne({'index':modifiedTho.index}, (error, tho) => {
     if (error) return res.json({error: 'Co loi, de nghi lien he tac gia!'});
@@ -28,6 +26,7 @@ router.post('/tho', (req, res) => {
       changedTho.content = modifiedTho.content;
       changedTho.footer = modifiedTho.footer;
       changedTho.imgUrl = modifiedTho.imgUrl;
+      changedTho.mediaUrl = modifiedTho.mediaUrl;
 
       changedTho.save((error) => {
         if (error) return res.json({error: error.message});
@@ -44,8 +43,8 @@ router.post('/tho', (req, res) => {
   })
 });
 
+// NOTE: Use to delete all data just in case, TURNOFF when no use!
 // router.get('/tho/emergency', (req, res) => {
-//   // use to delete all data just in case, turnoff when no use!
 //   Tho.remove({}, (error) => {
 //     if(error) return res.json({error: 'Unknown error!'});
 //     res.status(200).json({done: 'OK'});
