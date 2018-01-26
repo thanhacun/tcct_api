@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const mongooseAlgolia = require('mongoose-algolia');
+const User = require('../models/user');
 
 const ThoSchema = mongoose.Schema({
   index: {type: Number, unique: true},
@@ -7,7 +8,9 @@ const ThoSchema = mongoose.Schema({
   content: String,
   footer: String,
   imgUrl: String,
-  mediaUrl: String
+  mediaUrl: String,
+  // comments: [{submitTime: Date, username: String, comment: String}] TODO: move to a separated object
+  postedUser: {type: mongoose.Schema.ObjectId, ref: 'User'}
 });
 
 // for sync index with Algolia
