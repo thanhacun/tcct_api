@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const mongooseAlgolia = require('mongoose-algolia');
-const User = require('../models/user');
+const User = require('./user');
+const Comment = require('./comment');
 
 const ThoSchema = mongoose.Schema({
   index: {type: Number, unique: true},
@@ -9,7 +10,7 @@ const ThoSchema = mongoose.Schema({
   footer: String,
   imgUrl: String,
   mediaUrl: String,
-  // comments: [{submitTime: Date, username: String, comment: String}] TODO: move to a separated object
+  comments: [{type: mongoose.Schema.ObjectId, ref: 'Comment'}],
   postedUser: {type: mongoose.Schema.ObjectId, ref: 'User'}
 });
 
@@ -27,5 +28,5 @@ const Tho = mongoose.model('Tho', ThoSchema);
 //   searchableAttributes: ['title', 'content', 'index']
 // });
 
-//module.exports = mongoose.model('Tho', Tho);
+// module.exports = mongoose.model('Tho', Tho);
 module.exports = Tho;
