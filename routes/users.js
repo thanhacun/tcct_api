@@ -3,6 +3,7 @@ var passport = require('passport');
 var request= require('request');
 var router = express.Router();
 
+const User = require('../models/user');
 const authCheck = require('../utils/auth_check');
 
 router.get('/getinfo', authCheck, (req, res) => {
@@ -46,6 +47,31 @@ router.get('/social/login', (req, res, next) => {
     return res.status(200).json({token, user});
   })(req, res, next);
 });
+
+// =======================
+// update user profile
+// [] TODO: Check security
+// =======================
+router.get('/_updateprofile', (req, res) => {
+  User.find({}, (error, allUsers) => {
+    if (error) return res.json({error: error.message});
+    let updatedUsers = [];
+    allUsers.forEach(user => {
+      if (!user.profile.email) {
+        user.profile = {
+          email: (user.local && user.local.email) ||
+                 (user.facebook && user.facebook.email) ||
+                 (user.google && user.google.email)
+        }
+        user.save(error => {
+          if (error) return res.json({error: error.message});
+          updatedUsers.push(user);
+        });
+      }
+    })
+    res.status(200).json(allUsers);
+  })
+})
 
 // ==========================
 // AUTHORIZE ================

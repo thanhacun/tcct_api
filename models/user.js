@@ -26,7 +26,11 @@ var userSchema = mongoose.Schema({
   },
   role: {
     admin: {type: Boolean, default: false},
-    user: {type: Boolean, default: true} 
+    user: {type: Boolean, default: true}
+  },
+  profile: {
+    email: String,
+    avatar: String
   }
 });
 
@@ -40,5 +44,14 @@ userSchema.methods.generateHash = function(password) {
 userSchema.methods.validPassword = function(password){
   return bcrypt.compareSync(password, this.local.password);
 };
+
+//generate user profile
+userSchema.pre('save', function(next) {
+  this.profile.email = (this.local && this.local.email) ||
+    (this.facebook && this.facebook.email) ||
+    (this.google && this.google.email)
+  //[] TODO: getting avatar url from google or facebook profile
+  next();
+})
 
 module.exports = mongoose.model('User', userSchema);

@@ -7,7 +7,6 @@ const CommentSchema = mongoose.Schema({
   postedUser: {type: mongoose.Schema.ObjectId, ref: 'User'}
 });
 
-
 // Arrow function not functioning here
 CommentSchema.pre('save', function(next) {
   this.postedAt = Date.now();

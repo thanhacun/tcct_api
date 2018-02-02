@@ -57,6 +57,7 @@ router.get('/tho/:index/comments', (req, res) => {
       path: 'comments',
       populate: {
         path: 'postedUser',
+        select: 'profile',
         model: 'User'
       }
     }).exec((error, tho) => {

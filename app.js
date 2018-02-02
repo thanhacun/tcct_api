@@ -1,11 +1,11 @@
-var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var mongoose = require('mongoose');
-var passport = require('passport');
+const express = require('express');
+const path = require('path');
+const favicon = require('serve-favicon');
+const logger = require('morgan');
+const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+const passport = require('passport');
 //var session = require('express-session');
 
 // setting public variables - process.env.VAR_NAME
@@ -14,7 +14,7 @@ require('dotenv').config()
 const users = require('./routes/users');
 const tcct = require('./routes/tcct');
 
-var app = express();
+const app = express();
 
 // ==========================
 // MONGODB =================
@@ -44,7 +44,6 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-
 
 //enable CORS in express for development
 if (process.env.CORS) {
