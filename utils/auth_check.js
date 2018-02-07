@@ -4,10 +4,9 @@ const User = require('../models/user');
 /* Auth checker middleware function */
 
 module.exports = (req, res, next) => {
-  console.log("=== USER HAS TO LOGIN ===");
-  let error = new Error();
+  console.log("=== CHECKING USER LOG IN ... ===");
   if (!req.headers.authorization) {
-    // error.message = 'Not yet logged in!';
+    res.locals.error = 'Not yet logged in!';
     return next();
   }
 
@@ -17,19 +16,17 @@ module.exports = (req, res, next) => {
   // decode the token using the secret key phrase
   return jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) {
-      // error.message = 'Cannot verify user!';
+      res.locals.error = 'Cannot verify user!';
       return next();
     }
-
     const decodedUser = decoded.sub;
     User.findById(decodedUser, (err, user) => {
-      if (err || !user) {error.message = 'Wrong password or no user!';}
-      // set error in req.locals
-      // may be for development only
-      // if (error.message) {
-      //   res.locals.error = error;
-      // }
+      if (err || !user) {
+        res.locals.error = 'Wrong password or no user';
+        return next();
+      }
       req.user = {user};
+      console.log('=== USER LOGGED IN ===')
       return next();
     });
   });

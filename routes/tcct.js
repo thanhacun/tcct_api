@@ -66,10 +66,10 @@ router.get('/tho/:index/comments', (req, res) => {
   });
 });
 
-router.post('/tho/:index/comment', (req, res) => {
-  if (res.locals && res.locals.error) {
-    return res.status(401).json({error: res.locals.error.message});
-  }
+router.post('/tho/:index/comment', authCheck, (req, res) => {
+  if (res.locals && res.locals.error) { return res.status(401).json({error: req.locals.error});}
+  // if (!req.user) { return res.status(401).json({error: 'There is no user!'})};
+
   const thoIndex = Number(req.params.index);
   const { postedComment, commentAction } = req.body;
 
