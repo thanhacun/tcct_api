@@ -1,6 +1,5 @@
 var express = require('express');
 var passport = require('passport');
-var request= require('request');
 var router = express.Router();
 
 const User = require('../models/user');
@@ -50,9 +49,10 @@ router.get('/social/login', (req, res, next) => {
 
 // =======================
 // update user profile
-// [] TODO: Check security
+// [X] TODO: Check security
 // =======================
-router.get('/_updateprofile', (req, res) => {
+router.get('/_updateprofile', authCheck, (req, res) => {
+  if (res.locals && res.locals.error) { return res.status(401).json({error: req.locals.error});}
   User.find({}, (error, allUsers) => {
     if (error) return res.json({error: error.message});
     let updatedUsers = [];

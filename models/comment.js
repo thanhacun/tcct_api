@@ -3,6 +3,7 @@ const User = require('./user');
 
 const CommentSchema = mongoose.Schema({
   text: String,
+  spoiler: {type: Boolean, default: false},
   postedAt: {type: Date},
   postedUser: {type: mongoose.Schema.ObjectId, ref: 'User'}
 });

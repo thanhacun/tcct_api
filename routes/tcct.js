@@ -14,9 +14,9 @@ router.get('/tho/:index', (req, res) => {
   });
 });
 
-router.post('/tho', (req, res) => {
+router.post('/tho', authCheck, (req, res) => {
   if (res.locals && res.locals.error) {
-    return res.status(401).json({error: res.locals.error.message});
+    return res.status(401).json({error: res.locals.error});
   }
   const { modifiedTho, modifyAction } = req.body;
   Tho.findOne({_id:modifiedTho._id}, (error, tho) => {
@@ -76,16 +76,12 @@ router.post('/tho/:index/comment', authCheck, (req, res) => {
   Tho.findOne({index: thoIndex}, (error, tho) => {
     if (error) return res.json({error: 'Co loi, de nghi lien he tac gia!'});
     if (tho && commentAction === 'save') {
-      let newComment = new Comment();
-      newComment.text = postedComment.text;
-      newComment.postedUser = postedComment.postedUser;
-      newComment.save((error, addedComment) => {
+      const affectedComment = new Comment(postedComment);
+      Comment.findOneAndUpdate({_id: affectedComment._id}, affectedComment, {upsert: true, new: true}, (error, newComment) => {
         if (error) return res.json({error: error.message});
-        if (tho.comments) {
-          tho.comments.push(addedComment._id);
-        } else {
-          tho.comments = []
-          tho.comments.push(addedComment._id);
+        if (!postedComment._id) {
+          // new comment => add to tho.comments using concat method
+          tho.comments = (tho.comments || []).concat(newComment._id);
         }
         tho.save((error, updatedTho) => {
           if (error) return res.json({error: error.message});
@@ -98,31 +94,29 @@ router.post('/tho/:index/comment', authCheck, (req, res) => {
             }
           }, (error, updatedTho) => {
             if (error) return res.json({error: error.message});
-            return res.status(200).json({comments: updatedTho.comments, update: 'added'})
+            return res.status(200).json({comments: updatedTho.comments, update: 'updated'})
           })
         });
       });
     }
+
     if (tho && commentAction === 'delete') {
-      Comment.findOne({_id: postedComment._id}, (error, comment) => {
+      Comment.findOneAndRemove({_id: postedComment._id}, (error) => {
         if (error) return res.json({error: error.message});
-        comment.remove(error => {
+        tho.comments = tho.comments.filter(comment => comment != postedComment._id);
+        tho.save(error => {
           if (error) return res.json({error: error.message});
-          tho.comments = tho.comments.filter(comment => comment != postedComment._id);
-          tho.save(error => {
+          //populate users in comments to return updated data
+          tho.populate({
+            path: 'comments',
+            populate: {
+              path: 'postedUser',
+              model: 'User'
+            }
+          }, (error, updatedTho) => {
             if (error) return res.json({error: error.message});
-            //populate users in comments to return updated data
-            tho.populate({
-              path: 'comments',
-              populate: {
-                path: 'postedUser',
-                model: 'User'
-              }
-            }, (error, updatedTho) => {
-              if (error) return res.json({error: error.message});
-              return res.status(200).json({comments: updatedTho.comments, update: 'deleted'})
-            })
-          });
+            return res.status(200).json({comments: updatedTho.comments, update: 'deleted'})
+          })
         });
       });
     }
@@ -130,6 +124,7 @@ router.post('/tho/:index/comment', authCheck, (req, res) => {
 })
 
 // NOTE: Use to delete all data just in case, TURNOFF when no use!
+// REVIEW whenever turn on!
 // router.get('/tho/emergency', (req, res) => {
 //   Tho.remove({}, (error) => {
 //     if(error) return res.json({error: 'Unknown error!'});
