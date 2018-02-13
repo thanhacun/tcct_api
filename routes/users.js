@@ -57,15 +57,17 @@ router.get('/_updateprofile', authCheck, (req, res) => {
     if (error) return res.json({error: error.message});
     let updatedUsers = [];
     allUsers.forEach(user => {
-      if (!user.profile.email) {
+      // update profilePicURL
+      if (!user.profile.email || !user.profile.avatar) {
         user.profile = {
           email: (user.local && user.local.email) ||
                  (user.facebook && user.facebook.email) ||
                  (user.google && user.google.email)
         }
+
         user.save(error => {
-          if (error) return res.json({error: error.message});
-          updatedUsers.push(user);
+            if (error) return res.json({error: error.message});
+            updatedUsers.push(user);
         });
       }
     })

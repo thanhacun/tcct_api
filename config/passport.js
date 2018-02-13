@@ -179,6 +179,7 @@ module.exports = function(passport) {
           newUser[provider].token = accessToken;
           newUser[provider].name = profile.name.givenName + ' ' + profile.name.familyName;
           newUser[provider].email = profile.emails[0].value;
+          newUser[provider].profilePicURL = profile.photos[0].value;
 
           newUser.save(function(err) {
             if (err) throw err;

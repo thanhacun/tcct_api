@@ -4,15 +4,16 @@ const User = require('./user');
 const CommentSchema = mongoose.Schema({
   text: String,
   spoiler: {type: Boolean, default: false},
-  postedAt: {type: Date},
+  postedAt: {type: Date, default: Date.now()},
   postedUser: {type: mongoose.Schema.ObjectId, ref: 'User'}
 });
 
+// NOTE: the pre and post hook not working for update, findOneAndUpdate, etc
+// http://mongoosejs.com/docs/middleware.html
 // Arrow function not functioning here
-CommentSchema.pre('save', function(next) {
-  this.postedAt = Date.now();
-  next();
-});
+// CommentSchema.pre('find', function(next) {
+//   this.postedAt = Date.now();
+//   next();
+// });
 
-const Comment =  mongoose.model('Comment', CommentSchema);
-module.exports = Comment;
+module.exports = mongoose.model('Comment', CommentSchema);

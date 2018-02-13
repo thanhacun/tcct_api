@@ -10,19 +10,22 @@ var userSchema = mongoose.Schema({
     id: String,
     token: String,
     email: String,
-    name: String
+    name: String,
+    profilePicURL: String
   },
   twitter: {
     id: String,
     token: String,
     displayName: String,
-    username: String
+    username: String,
+    profilePicURL: String
   },
   google: {
     id: String,
     token: String,
     email: String,
-    name: String
+    name: String,
+    profilePicURL: String
   },
   role: {
     admin: {type: Boolean, default: false},
@@ -51,6 +54,8 @@ userSchema.pre('save', function(next) {
     (this.facebook && this.facebook.email) ||
     (this.google && this.google.email)
   //[] TODO: getting avatar url from google or facebook profile
+  this.profile.avatar = (this.facebook && this.facebook.profilePicURL) ||
+    (this.google && this.google.profilePicURL)
   next();
 })
 
