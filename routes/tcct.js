@@ -51,6 +51,8 @@ router.post('/tho', authCheck, (req, res) => {
 });
 
 router.get('/tho/:index/comments', (req, res) => {
+  // [X] TODO: return only comments having user
+  // it may be the case when user unlink account!
   const thoIndex = req.params.index;
   Tho.findOne({index: thoIndex})
     .populate({
@@ -62,7 +64,8 @@ router.get('/tho/:index/comments', (req, res) => {
       }
     }).exec((error, tho) => {
     if (error) return res.json({error: error.message});
-    return res.json({comments: tho.comments})
+    // return a list of comments that having postedUser
+    return res.json({comments: tho.comments.filter(comment => !!comment.postedUser)})
   });
 });
 
