@@ -25,7 +25,7 @@ module.exports = (req, res, next) => {
         res.locals.error = 'Wrong password or no user';
         return next();
       }
-      req.user = {user};
+      req.user = user;
       console.log('=== USER LOGGED IN ===')
       return next();
     });

@@ -50,6 +50,13 @@ router.post('/tho', authCheck, (req, res) => {
   })
 });
 
+router.get('/allthos', (req, res) => {
+  Tho.find({}).populate('postedUser').exec((error, thos) => {
+    if (error) return res.status(401).json({error: error.message});
+    res.status(200).json(thos);
+  })
+})
+
 router.get('/tho/:index/comments', (req, res) => {
   // [X] TODO: return only comments having user
   // it may be the case when user unlink account!

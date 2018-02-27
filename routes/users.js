@@ -11,6 +11,16 @@ router.get('/getinfo', authCheck, (req, res) => {
   return res.status(200).json(req.user);
 });
 
+router.get('/allusers', authCheck, (req, res) => {
+  if (res.locals && res.locals.error) { return res.status(401).json({error: req.locals.error.message}); }
+  if (!req.user) { return res.status(401).json({error: 'There is no user!'}); }
+  if (req.user.role && !req.user.role.admin) { return res.status(401).json({error: 'Not admin user!'}); }
+  User.find({}, (error, allUsers) => {
+    if (error) return res.json({error: error.message});
+    return res.status(200).json(Object.assign({}, req.user.toObject(), {allUsers}));
+  })
+})
+
 // ==========================
 // LOCAL AUTH ===============
 // ==========================
@@ -24,7 +34,8 @@ router.post(['/signup', '/connect'], function(req, res, next){
 router.post('/login', (req, res, next) => {
   return passport.authenticate('local-strategy', (err, token, user) => {
     if (err) { return res.status(401).json({error: err.message}); }
-    return res.json({token, user});
+    // [X] NOTE: user is mongoose doc object, using method toObject to convert to js plain object
+    return res.status(200).json(Object.assign({}, user.toObject(), {token}));
   })(req, res, next);
 });
 
@@ -35,7 +46,7 @@ router.get(['/social/signup', '/social/connect', '/social/unlink'], (req, res, n
   return passport.authenticate(req.headers.strategy, (err, user) => {
     //handle error
     if (err) { return res.status(401).json({error: err.message}); }
-    return res.status(200).json({user});
+    return res.status(200).json(user);
   })(req, res, next);
 });
 
@@ -43,7 +54,7 @@ router.get('/social/login', (req, res, next) => {
   return passport.authenticate(req.headers.strategy, (err, token, user) => {
     //handle error
     if (err) { return res.status(401).json({error: err.message}); }
-    return res.status(200).json({token, user});
+    return res.status(200).json(Object.assign({}, user.toObject(), {token}));
   })(req, res, next);
 });
 
