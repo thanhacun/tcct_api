@@ -25,8 +25,7 @@ module.exports = (req, res, next) => {
         res.locals.error = 'Wrong password or no user';
         return next();
       }
-      // [] TODO: check admin user to apply further security verification
-      req.user = user;
+      req.user = decodedUser;
       console.log('=== USER LOGGED IN ===')
       return next();
     });
