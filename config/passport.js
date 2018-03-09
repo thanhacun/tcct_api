@@ -18,6 +18,14 @@ const configAuth = {
   }
 }
 
+// [] TODO: Token generation function
+const generateToken = user => {
+  // cleaningup user
+  const payload = {sub: user};
+  // the token will expire in 24 hours for normal user and 1 hour for admin
+  const expiresIn = 60 * 60 * (user.role.admin ? 1 : 24);
+  return jwt.sign(payload, process.env.JWT_SECRET, {expiresIn});
+}
 
 module.exports = function(passport) {
   passport.serializeUser(function(user, done){
@@ -46,27 +54,24 @@ module.exports = function(passport) {
 
         if (req.path === '/login') {// generate token and log user in
           if (!user.validPassword(password)) return done(new Error('Wrong password!'));
-          const payload = {sub: user};
-          const token = jwt.sign(payload, process.env.JWT_SECRET);
-          return done(null, token, user);
+          return done(null, generateToken(user), user);
         }
 
         if (req.path === '/connect') {
           if (!user.validPassword(password)) return done(new Error('Wrong password!'));
 
           // get socialUser from database
-          // need provider and email address
           const { social_email, social_provider } = req.query;
           User.findOne({[`${social_provider}.email`]: social_email}, (err, socialUser) => {
             if (err || !socialUser)  return done(err);
             socialUser.local = user.local
 
-            // save socialUser then remove user
+            // save socialUser => remove user => return socialUser with token
             socialUser.save((err) => {
               if (err) throw err;
               user.remove((err) => {
                 if (err) throw err;
-                return done(null, socialUser);
+                return done(null, generateToken(socialUser), socialUser);
               });
             });
           });
@@ -79,7 +84,7 @@ module.exports = function(passport) {
           newUser.local.password = newUser.generateHash(password);
           newUser.save(function(err){
             if (err) throw err;
-            return done(null, newUser);
+            return done(null, generateToken(newUser), newUser);
           });
         }
         if (req.path === '/login' || req.path === '/connect') return done(new Error('Email does not exist!'))
@@ -91,7 +96,7 @@ module.exports = function(passport) {
 // SOCIAL TOKEN STRATEGIES===
 // ==========================
 
-// helper functions return straegy for facebook, google and twitter
+// helper functions return strategy for facebook, google
 // (provider, clientID, clientSecret) => provider strategy
 
   const socialTokenStrategy = (provider, middleware=socialTokenMiddleware) => {
@@ -119,7 +124,7 @@ module.exports = function(passport) {
             user[provider].token = accessToken;
             user.save((err) => {
               if (err) throw err;
-              return done(null, user);
+              return done(null, generateToken(user), user);
             })
           }
         };
@@ -127,9 +132,9 @@ module.exports = function(passport) {
         if (req.path === '/social/login') {
           if (!user[provider].token) return done(new Error('User already unlinked!'));
           // create jwt token and log the social user in
-          const payload = {sub: user };
-          const token = jwt.sign(payload, process.env.JWT_SECRET);
-          return done(null, token, user);
+          // const payload = {sub: user };
+          // const token = jwt.sign(payload, process.env.JWT_SECRET);
+          return done(null, generateToken(user), user);
         }
 
         if (req.path === '/social/connect') {
@@ -140,12 +145,12 @@ module.exports = function(passport) {
             if (err || !localUser) return done(err);
             localUser[provider] = user[provider];
 
-            //save locaUser then remove user
+            //save localUser => remove user => return localUser
             localUser.save((err) => {
               if (err) throw err;
               user.remove((err) => {
                 if (err) throw err;
-                return done(null, localUser);
+                return done(null, generateToken(localUser), localUser);
               });
             });
           });
@@ -168,7 +173,7 @@ module.exports = function(passport) {
             user[provider].token = '';
             user.save((err) => {
               if (err) throw err;
-              return done(null, user);
+              return done(null, null, user);
             });
           }
         }

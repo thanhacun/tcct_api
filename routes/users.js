@@ -25,9 +25,9 @@ router.get('/allusers', authCheck, (req, res) => {
 // LOCAL AUTH ===============
 // ==========================
 router.post(['/signup', '/connect'], function(req, res, next){
-  passport.authenticate('local-strategy', function(err, user) {
+  passport.authenticate('local-strategy', function(err, token, user) {
     if (err) { return res.status(401).json({error: err.message}) }
-    return res.status(200).json({user});
+    return res.status(200).json(Object.assign({}, user.toObject(), {token}));
   })(req, res, next);
 });
 
@@ -43,10 +43,10 @@ router.post('/login', (req, res, next) => {
 // SOCIAL AUTH =============
 // =========================
 router.get(['/social/signup', '/social/connect', '/social/unlink'], (req, res, next) => {
-  return passport.authenticate(req.headers.strategy, (err, user) => {
+  return passport.authenticate(req.headers.strategy, (err, token, user) => {
     //handle error
     if (err) { return res.status(401).json({error: err.message}); }
-    return res.status(200).json(user);
+    return res.status(200).json(Object.assign({}, user.toObject(), {token}));
   })(req, res, next);
 });
 

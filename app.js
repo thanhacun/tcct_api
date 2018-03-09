@@ -6,7 +6,7 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const passport = require('passport');
-//var session = require('express-session');
+const session = require('express-session');
 
 // setting public variables - process.env.VAR_NAME
 require('dotenv').config()
@@ -57,7 +57,7 @@ if (process.env.CORS) {
 /* PASSPORT */
 // NOTE: jwt does not require session
 require('./config/passport')(passport);
-//app.use(session({ secret: 'my api server' }));
+app.use(session({ secret: 'tcct_api_server' }));
 app.use(passport.initialize());
 app.use(passport.session());
 
