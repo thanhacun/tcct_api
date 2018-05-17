@@ -4,7 +4,7 @@ config/auth.js
 local_data
 data
 dump
-build
+# build
 .env
 .env.production
 *.log
